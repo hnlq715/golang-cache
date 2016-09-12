@@ -1,23 +1,28 @@
 package main
 
 import (
-	"cache"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
+
+	"github.com/hnlq715/cache"
 
 	"gopkg.in/redis.v4"
 )
 
 func main() {
 	c := cache.New(&cache.Option{
-		Expire:      60 * time.Second,
-		LockTimes:   3,
-		RedisExpire: 600 * time.Second,
-		RedisRing: &redis.RingOptions{
-			Addrs: map[string]string{
-				"redis01": "192.168.33.10:6379",
+		LRU: &cache.LRUOption{
+			Expire:  600 * time.Second,
+			MaxSize: 1,
+		},
+		Redis: &cache.RedisOption{
+			Expire: 600 * time.Second,
+			Ring: &redis.RingOptions{
+				Addrs: map[string]string{
+					"redis01": "192.168.1.77:6379",
+				},
 			},
 		},
 	})
@@ -32,7 +37,7 @@ func main() {
 
 	http.HandleFunc("/get", func(rw http.ResponseWriter, r *http.Request) {
 		data, err := c.Get("test")
-		if err != nil {
+		if err != nil && err != redis.Nil {
 			log.Fatalf("c.Get failed, err=%s", err)
 		}
 		rw.Write(data)

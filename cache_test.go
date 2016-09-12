@@ -10,12 +10,16 @@ import (
 
 func TestSetAndGet(t *testing.T) {
 	c := New(&Option{
-		Expire:      60 * time.Second,
-		LockTimes:   3,
-		RedisExpire: 600 * time.Second,
-		RedisRing: &redis.RingOptions{
-			Addrs: map[string]string{
-				"redis01": "192.168.33.10:6379",
+		LRU: &LRUOption{
+			Expire:  300 * time.Second,
+			MaxSize: 100,
+		},
+		Redis: &RedisOption{
+			Expire: 600 * time.Second,
+			Ring: &redis.RingOptions{
+				Addrs: map[string]string{
+					"redis01": "192.168.1.77:6379",
+				},
 			},
 		},
 	})
@@ -29,17 +33,20 @@ func TestSetAndGet(t *testing.T) {
 
 func BenchmarkSet(b *testing.B) {
 	c := New(&Option{
-		Expire:      60 * time.Second,
-		LockTimes:   3,
-		RedisExpire: 600 * time.Second,
-		RedisRing: &redis.RingOptions{
-			Addrs: map[string]string{
-				"redis01": "192.168.1.77:6379",
+		LRU: &LRUOption{
+			Expire:  300 * time.Second,
+			MaxSize: 100,
+		},
+		Redis: &RedisOption{
+			Expire: 600 * time.Second,
+			Ring: &redis.RingOptions{
+				Addrs: map[string]string{
+					"redis01": "192.168.1.77:6379",
+				},
 			},
 		},
 	})
 
-	c.load()
 	time.Sleep(1 * time.Second)
 
 	b.ResetTimer()
@@ -51,17 +58,20 @@ func BenchmarkSet(b *testing.B) {
 
 func BenchmarkGet(b *testing.B) {
 	c := New(&Option{
-		Expire:      60 * time.Second,
-		LockTimes:   3,
-		RedisExpire: 600 * time.Second,
-		RedisRing: &redis.RingOptions{
-			Addrs: map[string]string{
-				"redis01": "192.168.1.77:6379",
+		LRU: &LRUOption{
+			Expire:  300 * time.Second,
+			MaxSize: 100,
+		},
+		Redis: &RedisOption{
+			Expire: 600 * time.Second,
+			Ring: &redis.RingOptions{
+				Addrs: map[string]string{
+					"redis01": "192.168.1.77:6379",
+				},
 			},
 		},
 	})
 
-	c.load()
 	time.Sleep(1 * time.Second)
 
 	b.ResetTimer()
