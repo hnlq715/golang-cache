@@ -32,10 +32,7 @@ type Cache struct {
 
 	g Group
 
-	nbytes     AtomicInt
-	lhit, lget AtomicInt
-	rhit, rget AtomicInt
-	nevicted   AtomicInt
+	stats CacheStats
 
 	arc     *lru.ARCCache
 	cluster *redis.ClusterClient
@@ -87,12 +84,12 @@ func (c *Cache) Get(key string) ([]byte, error) {
 		return data, err
 	}
 
-	c.lget.Add(1)
+	c.stats.LGets.Add(1)
 	data, ok := c.arc.Get(key)
 	if !ok {
 		return nil, errors.New("c.arc.Get failed")
 	}
-	c.lhit.Add(1)
+	c.stats.LHits.Add(1)
 
 	return data.([]byte), nil
 }
@@ -135,9 +132,9 @@ func (c *Cache) getRedis(key string) ([]byte, error) {
 		data, err = c.ring.Get(key).Bytes()
 	}
 
-	c.rget.Add(1)
+	c.stats.RGets.Add(1)
 	if err == nil {
-		c.rhit.Add(1)
+		c.stats.RHits.Add(1)
 	}
 
 	return data, err
@@ -151,6 +148,10 @@ func (c *Cache) setRedis(key string, data []byte, expire time.Duration) error {
 	}
 
 	return errors.New("no redis client found")
+}
+
+func (c *Cache) Stats() *CacheStats {
+	return &c.stats
 }
 
 func init() {

@@ -24,22 +24,21 @@ func (i *AtomicInt) String() string {
 
 // CacheStats are returned by stats accessors on Group.
 type CacheStats struct {
-	Bytes     int64
-	Items     int64
-	Gets      int64
-	Hits      int64
-	Evictions int64
+	Bytes     AtomicInt
+	Items     AtomicInt
+	LGets     AtomicInt
+	LHits     AtomicInt
+	RGets     AtomicInt
+	RHits     AtomicInt
+	Evictions AtomicInt
 }
 
 // Stats are per-group statistics.
 type Stats struct {
-	Gets           AtomicInt // any Get request, including from peers
-	CacheHits      AtomicInt // either cache was good
-	PeerLoads      AtomicInt // either remote load or remote cache hit (not an error)
-	PeerErrors     AtomicInt
-	Loads          AtomicInt // (gets - cacheHits)
-	LoadsDeduped   AtomicInt // after singleflight
-	LocalLoads     AtomicInt // total good local loads
-	LocalLoadErrs  AtomicInt // total bad local loads
-	ServerRequests AtomicInt // gets that came over the network from peers
+	Gets          AtomicInt // any Get request, including from peers
+	CacheHits     AtomicInt // either cache was good
+	Loads         AtomicInt // (gets - cacheHits)
+	LoadsDeduped  AtomicInt // after singleflight
+	LocalLoads    AtomicInt // total good local loads
+	LocalLoadErrs AtomicInt // total bad local loads
 }
